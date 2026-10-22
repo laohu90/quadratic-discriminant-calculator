@@ -24,15 +24,15 @@ export const LANGUAGES: LangItem[] = [
 
 export function detectUserLanguage(): SupportedLang {
   try {
+    const params = new URLSearchParams(window.location.search);
+    const urlLang = params.get('lang');
+    if (urlLang && ['en', 'es', 'fr', 'pt', 'zh'].includes(urlLang)) {
+      return urlLang as SupportedLang;
+    }
     const saved = localStorage.getItem('user_lang_pref');
     if (saved && ['en', 'es', 'fr', 'pt', 'zh'].includes(saved)) {
       return saved as SupportedLang;
     }
-    const nav = (navigator.language || (navigator as any).userLanguage || '').toLowerCase();
-    if (nav.startsWith('es')) return 'es';
-    if (nav.startsWith('fr')) return 'fr';
-    if (nav.startsWith('pt')) return 'pt';
-    if (nav.startsWith('zh')) return 'zh';
   } catch {
     // fallback
   }
