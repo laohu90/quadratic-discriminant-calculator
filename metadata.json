@@ -1,0 +1,6 @@
+{
+  "name": "Quadratic Discriminant Calculator & Step-by-Step Solver",
+  "description": "Interactive quadratic equation discriminant calculator, completing the square step-by-step solver, and parabola visualizer for Algebra students.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://quadratic-discriminant-calculator.formulacalckit.com/sitemap.xml
