@@ -58,7 +58,7 @@ export default function App() {
   const [c, setC] = useState<number>(initial.c);
 
   const [lang, setLang] = useState<SupportedLang>(() => detectUserLanguage());
-  const [activeTab, setActiveTab] = useState<'solver' | 'completing-square' | 'methods' | 'practice' | 'guide'>('solver');
+  const [activeTab, setActiveTab] = useState<'solver' | 'completing-square' | 'methods' | 'graph' | 'practice' | 'guide'>('solver');
   const [showWorksheetModal, setShowWorksheetModal] = useState<boolean>(false);
   const [shareFeedback, setShareFeedback] = useState(false);
 
@@ -266,94 +266,114 @@ export default function App() {
 
       {/* Main Content Workspace */}
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full space-y-6">
-        {/* Preset Selector */}
-        <PresetSelector
-          lang={lang}
-          currentA={a}
-          currentB={b}
-          currentC={c}
-          onSelect={handleEquationChange}
-        />
+        {/* Equation Input & Presets always accessible at top */}
+        <div className="space-y-4">
+          <EquationInput
+            a={a}
+            b={b}
+            c={c}
+            onChange={handleEquationChange}
+            lang={lang}
+          />
+          <PresetSelector
+            lang={lang}
+            currentA={a}
+            currentB={b}
+            currentC={c}
+            onSelect={handleEquationChange}
+          />
+        </div>
 
-        {/* Tab 1: Comprehensive Calculator & Visualizer */}
+        {/* Tab 1: Discriminant & Root Analysis (Focused primary result) */}
         {activeTab === 'solver' && (
-          <div className="space-y-6">
-            <EquationInput
-              a={a}
-              b={b}
-              c={c}
-              onChange={handleEquationChange}
-              lang={lang}
-            />
-
+          <div className="space-y-6 max-w-4xl mx-auto">
             <DiscriminantCard analysis={analysis} lang={lang} />
-
-            {/* Two-column layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              {/* Left Column (7 cols): Completing the Square & All Methods */}
-              <div className="lg:col-span-7 space-y-6">
-                <CompletingSquareView analysis={analysis} lang={lang} />
-                <QuadraticFormulaView analysis={analysis} lang={lang} />
-                <AllMethodsComparison analysis={analysis} lang={lang} />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-3">
+                <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+                  <span className="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-mono">1</span>
+                  {lang === 'en' ? 'Quick Solution Summary' : '核心解法速览'}
+                </h3>
+                <div className="space-y-2 text-sm text-slate-700">
+                  <div className="flex justify-between py-1 border-b border-slate-200">
+                    <span className="text-slate-500">{lang === 'en' ? 'Vertex (h, k)' : '顶点坐标 (h, k)'}:</span>
+                    <span className="font-mono font-semibold">({analysis.vertex.x.toFixed(2)}, {analysis.vertex.y.toFixed(2)})</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-slate-200">
+                    <span className="text-slate-500">{lang === 'en' ? 'Axis of Symmetry' : '对称轴'}:</span>
+                    <span className="font-mono font-semibold">x = {analysis.axisOfSymmetry}</span>
+                  </div>
+                  <div className="flex justify-between py-1">
+                    <span className="text-slate-500">{lang === 'en' ? 'Y-Intercept' : 'Y轴截距'}:</span>
+                    <span className="font-mono font-semibold">(0, {c})</span>
+                  </div>
+                </div>
               </div>
 
-              {/* Right Column (5 cols): Parabola Graph, Coordinates Table & Explorer */}
-              <div className="lg:col-span-5 space-y-6 sticky top-20">
-                <ParabolaGraph analysis={analysis} lang={lang} />
-                <ParabolaTable analysis={analysis} lang={lang} />
-                <RealWorldModelingCard analysis={analysis} lang={lang} />
-                <DiscriminantSliderExplorer
-                  initialA={a}
-                  initialB={b}
-                  onApplyC={(newC) => setC(newC)}
-                  lang={lang}
-                />
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex flex-col justify-between">
+                <div>
+                  <h3 className="font-bold text-slate-900 text-base mb-2 flex items-center gap-2">
+                    <span className="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-mono">2</span>
+                    {lang === 'en' ? 'Explore Detailed Methods' : '深入探索其他解法'}
+                  </h3>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    {lang === 'en'
+                      ? 'Switch to the tabs above to view the 8-step Completing the Square breakdown, Quadratic Formula, Parabola graph, or Practice Quiz.'
+                      : '点击上方标签可随时查看 8 步配方法详细推导、求根公式、抛物线可视化图表或进行刷题测试。'}
+                  </p>
+                </div>
+                <div className="pt-4 flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setActiveTab('completing-square')}
+                    className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-xs"
+                  >
+                    {lang === 'en' ? 'View Completing Square →' : '查看配方法全解 →'}
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('graph')}
+                    className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl text-xs font-bold transition"
+                  >
+                    {lang === 'en' ? 'View Graph & Table →' : '查看抛物线图表 →'}
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Academic Guide & FAQs at bottom for organic SEO reading */}
-            <EducationalGuide lang={lang} />
+            <RealWorldModelingCard analysis={analysis} lang={lang} />
           </div>
         )}
 
         {/* Tab 2: Completing the Square Focus */}
         {activeTab === 'completing-square' && (
-          <div className="space-y-6 max-w-5xl mx-auto">
-            <EquationInput
-              a={a}
-              b={b}
-              c={c}
-              onChange={handleEquationChange}
-              lang={lang}
-            />
+          <div className="space-y-6 max-w-4xl mx-auto">
             <CompletingSquareView analysis={analysis} lang={lang} />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <ParabolaGraph analysis={analysis} lang={lang} />
-              <QuadraticFormulaView analysis={analysis} lang={lang} />
-            </div>
-            <ParabolaTable analysis={analysis} lang={lang} />
           </div>
         )}
 
-        {/* Tab 3: Side-by-Side 4 Methods Comparison */}
+        {/* Tab 3: All Methods Comparison */}
         {activeTab === 'methods' && (
-          <div className="space-y-6 max-w-5xl mx-auto">
-            <EquationInput
-              a={a}
-              b={b}
-              c={c}
-              onChange={handleEquationChange}
+          <div className="space-y-6 max-w-4xl mx-auto">
+            <AllMethodsComparison analysis={analysis} lang={lang} />
+            <QuadraticFormulaView analysis={analysis} lang={lang} />
+          </div>
+        )}
+
+        {/* Tab 4: Parabola Graph & Table */}
+        {activeTab === 'graph' && (
+          <div className="space-y-6 max-w-4xl mx-auto">
+            <ParabolaGraph analysis={analysis} lang={lang} />
+            <ParabolaTable analysis={analysis} lang={lang} />
+            <DiscriminantSliderExplorer
+              initialA={a}
+              initialB={b}
+              onApplyC={(newC) => setC(newC)}
               lang={lang}
             />
-            <AllMethodsComparison analysis={analysis} lang={lang} />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <CompletingSquareView analysis={analysis} lang={lang} />
-              <QuadraticFormulaView analysis={analysis} lang={lang} />
-            </div>
           </div>
         )}
 
-        {/* Tab 4: Practice Quiz Challenge */}
+        {/* Tab 5: Quiz Challenge */}
         {activeTab === 'practice' && (
           <div className="max-w-3xl mx-auto space-y-6">
             <PracticeChallenge
@@ -368,12 +388,10 @@ export default function App() {
           </div>
         )}
 
-        {/* Tab 5: FAQ & Knowledge Hub */}
+        {/* Tab 6: FAQ & Guide */}
         {activeTab === 'guide' && (
           <div className="max-w-4xl mx-auto space-y-6">
             <EducationalGuide lang={lang} />
-            <AllMethodsComparison analysis={analysis} lang={lang} />
-            <DiscriminantCard analysis={analysis} lang={lang} />
           </div>
         )}
       </main>
