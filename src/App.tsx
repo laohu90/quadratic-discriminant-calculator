@@ -58,7 +58,19 @@ export default function App() {
   const [c, setC] = useState<number>(initial.c);
 
   const [lang, setLang] = useState<SupportedLang>(() => detectUserLanguage());
-  const [activeTab, setActiveTab] = useState<'solver' | 'completing-square' | 'methods' | 'graph' | 'practice' | 'guide'>('solver');
+
+  const getInitialTab = (): 'solver' | 'completing-square' | 'methods' | 'graph' | 'practice' | 'guide' => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const t = params.get('tab');
+      if (t && ['solver', 'completing-square', 'methods', 'graph', 'practice', 'guide'].includes(t)) {
+        return t as any;
+      }
+    } catch {}
+    return 'solver';
+  };
+
+  const [activeTab, setActiveTab] = useState<'solver' | 'completing-square' | 'methods' | 'graph' | 'practice' | 'guide'>(getInitialTab);
   const [showWorksheetModal, setShowWorksheetModal] = useState<boolean>(false);
   const [shareFeedback, setShareFeedback] = useState(false);
 
@@ -67,19 +79,25 @@ export default function App() {
     saveUserLanguage(lang);
   }, [lang]);
 
-  // Sync URL query params with current equation
+  // Sync URL query params with current equation and tab
   useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search);
       params.set('a', a.toString());
       params.set('b', b.toString());
       params.set('c', c.toString());
+      params.set('tab', activeTab);
       const newUrl = `${window.location.pathname}?${params.toString()}`;
       window.history.replaceState({}, '', newUrl);
     } catch {
       // Ignore in iframe restriction
     }
-  }, [a, b, c]);
+  }, [a, b, c, activeTab]);
+
+  const handleTabChange = (tab: typeof activeTab) => {
+    setActiveTab(tab);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Compute quadratic analysis
   const analysis = useMemo(() => {
@@ -132,10 +150,10 @@ export default function App() {
           {/* Navigation & Action buttons */}
           <div className="flex items-center gap-1.5 sm:gap-2.5">
             {/* View Tabs */}
-            <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
+            <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs overflow-x-auto max-w-[280px] sm:max-w-none">
               <button
-                onClick={() => setActiveTab('solver')}
-                className={`flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-lg font-semibold transition ${
+                onClick={() => handleTabChange('solver')}
+                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-semibold transition shrink-0 ${
                   activeTab === 'solver'
                     ? 'bg-white text-indigo-700 shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
@@ -147,8 +165,8 @@ export default function App() {
               </button>
 
               <button
-                onClick={() => setActiveTab('completing-square')}
-                className={`flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-lg font-semibold transition ${
+                onClick={() => handleTabChange('completing-square')}
+                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-semibold transition shrink-0 ${
                   activeTab === 'completing-square'
                     ? 'bg-white text-indigo-700 shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
@@ -160,8 +178,8 @@ export default function App() {
               </button>
 
               <button
-                onClick={() => setActiveTab('methods')}
-                className={`flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-lg font-semibold transition ${
+                onClick={() => handleTabChange('methods')}
+                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-semibold transition shrink-0 ${
                   activeTab === 'methods'
                     ? 'bg-white text-indigo-700 shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
@@ -173,8 +191,21 @@ export default function App() {
               </button>
 
               <button
-                onClick={() => setActiveTab('practice')}
-                className={`flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-lg font-semibold transition ${
+                onClick={() => handleTabChange('graph')}
+                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-semibold transition shrink-0 ${
+                  activeTab === 'graph'
+                    ? 'bg-white text-indigo-700 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Activity className="w-3.5 h-3.5" />
+                <span className="hidden md:inline">{lang === 'en' ? 'Graph & Table' : '图像与表格'}</span>
+                <span className="md:hidden">{lang === 'en' ? 'Graph' : '图表'}</span>
+              </button>
+
+              <button
+                onClick={() => handleTabChange('practice')}
+                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-semibold transition shrink-0 ${
                   activeTab === 'practice'
                     ? 'bg-white text-indigo-700 shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
@@ -186,8 +217,8 @@ export default function App() {
               </button>
 
               <button
-                onClick={() => setActiveTab('guide')}
-                className={`flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-lg font-semibold transition ${
+                onClick={() => handleTabChange('guide')}
+                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-semibold transition shrink-0 ${
                   activeTab === 'guide'
                     ? 'bg-white text-indigo-700 shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
